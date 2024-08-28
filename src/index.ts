@@ -1,63 +1,58 @@
-import toSource from "tosource";
-import type { Plugin } from "rollup";
-import { compileAsync } from "sass";
-import { transform as lightCss } from "lightningcss";
-import browersTarget from "./browserslist";
-import { readFile } from "fs/promises";
+import { readFile } from 'node:fs/promises'
+import type { Plugin } from 'rollup'
+import { compileAsync } from 'sass'
+import { transform as lightCss } from 'lightningcss'
+import browersTarget from './browserslist'
 
-
-export type Transformer = (code: string, id: string) => string | Promise<string>;
+export type Transformer = (code: string, id: string) => string | Promise<string>
 
 export interface Options {
   /**
    *  Defaults to imports that start with `inline:`, e.g.
    *  import 'inline:./file.ext';
    */
-  prefix?: string;
+  prefix?: string
 
   /**
    *  Enable the CSS transformer
    *  @default true
    */
-  enableCSSTransformer?: boolean;
+  enableCSSTransformer?: boolean
 
   /**
    *  Custom transformer
    */
-  transformer?: Transformer;
+  transformer?: Transformer
 }
 
-const cssTransformer = async (code: string, id: string) => {
-  
+async function cssTransformer(code: string, id: string) {
   const includes = ['.css', '.scss', '.sass']
-  if (!includes.some((ext) => id.toLowerCase().endsWith(ext))) return code
-  if (!id.toLowerCase().endsWith(".css")) {
-
-    code = (await compileAsync(id)).css;
-    console.log(code);
-    
+  if (!includes.some(ext => id.toLowerCase().endsWith(ext)))
+    return code
+  if (!id.toLowerCase().endsWith('.css')) {
+    code = (await compileAsync(id)).css
   }
-  
+
   code = lightCss({
+    // eslint-disable-next-line node/prefer-global/buffer
     code: Buffer.from(code),
     minify: true,
     sourceMap: false,
     targets: browersTarget,
     filename: id,
-  }).code.toString();
+  }).code.toString()
 
   return code
 }
 
 const defaults: Required<Omit<Options, 'transformer'>> = {
-  prefix: "inline:",
+  prefix: 'inline:',
   enableCSSTransformer: true,
-};
-
+}
 
 export default function inline(opts: Options = {}): Plugin {
-  const options = Object.assign({}, defaults, opts);
-  const { prefix, enableCSSTransformer, transformer } = options;
+  const options = Object.assign({}, defaults, opts)
+  const { prefix, enableCSSTransformer, transformer } = options
 
   const transFormers: Transformer[] = []
 
@@ -71,7 +66,7 @@ export default function inline(opts: Options = {}): Plugin {
   const paths = new Map()
 
   return {
-    name: "rollup-plugin-inline-import",
+    name: 'rollup-plugin-inline-import',
 
     resolveId: (sourcePath, importer) => {
       if (sourcePath.startsWith(prefix)) {
@@ -92,28 +87,24 @@ export default function inline(opts: Options = {}): Plugin {
         return null
       }
 
-
-      let code = await readFile(ids.id, "utf8")
+      let code = await readFile(ids.id, 'utf8')
       for (const transformer of transFormers) {
         code = await transformer(code, ids.id)
       }
-      console.log(code);
-      
 
       return `export default ${JSON.stringify(code.trim())};`
     },
 
-
     /*     async transform(content, id) {
           if (!extensions.some((ext) => id.toLowerCase().endsWith(ext)))
             return null;
-    
+
           let data = content;
-    
+
           if (id.toLowerCase().endsWith(".scss")) {
             data = (await compileAsync(id)).css;
           }
-    
+
           data = lightCss({
             code: Buffer.from(data),
             minify: true,
@@ -121,14 +112,14 @@ export default function inline(opts: Options = {}): Plugin {
             targets: browersTarget,
             filename: id,
           }).code.toString();
-    
+
           const code = `var data = ${toSource(data)};\n\n`;
           const exports = ["export default data;"];
-    
+
           return {
             code: code + exports,
             map: { mappings: "" },
           };
         }, */
-  };
+  }
 }
