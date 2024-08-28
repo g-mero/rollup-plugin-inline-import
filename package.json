@@ -10,6 +10,9 @@
   "scripts": {
     "build": "bun run bun.build.ts"
   },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.4",
@@ -26,11 +29,9 @@
     "rollup": "^4.21.1"
   },
   "dependencies": {
-    "@rollup/pluginutils": "^5.1.0",
     "browserslist": "^4.23.3",
     "lightningcss": "^1.26.0",
-    "sass": "^1.77.8",
-    "tosource": "^2.0.0-alpha.3"
+    "sass": "^1.77.8"
   },
   "peerDependencies": {
     "typescript": "^5.5.4"

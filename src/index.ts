@@ -55,7 +55,7 @@ const defaults: Required<Omit<Options, 'transformer'>> = {
 };
 
 
-export default function css(opts: Options = {}): Plugin {
+export default function inline(opts: Options = {}): Plugin {
   const options = Object.assign({}, defaults, opts);
   const { prefix, enableCSSTransformer, transformer } = options;
 
