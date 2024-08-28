@@ -1,0 +1,38 @@
+{
+  "name": "rollup-plugin-inline-import",
+  "module": "dist/index.js",
+  "main": "dist/index.js",
+  "version": "0.1.0",
+  "description": "A Rollup plugin to import file as string, such as css, html, svg, etc.",
+  "type": "module",
+  "author": "Gmero <gmerocom@gmail.com>",
+  "homepage": "https://github.com/g-mero/rollup-plugin-importcss",
+  "scripts": {
+    "build": "bun run bun.build.ts"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-typescript": "^7.24.7",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^25.0.8",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@types/bun": "latest",
+    "@types/node": "^22.5.1",
+    "@xbmlz/eslint-config-prettier": "^0.1.17",
+    "@xbmlz/eslint-config-ts": "^0.1.17",
+    "bun-plugin-dts": "^0.2.3",
+    "eslint": "^8.57.0",
+    "rollup": "^4.21.1"
+  },
+  "dependencies": {
+    "@rollup/pluginutils": "^5.1.0",
+    "browserslist": "^4.23.3",
+    "lightningcss": "^1.26.0",
+    "sass": "^1.77.8",
+    "tosource": "^2.0.0-alpha.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
