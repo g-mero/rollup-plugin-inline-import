@@ -90,7 +90,7 @@ export default function inline(opts: Options = {}): Plugin {
         if (sourcePath.startsWith(transformer.prefix)) {
           const path = sourcePath.slice(transformer.prefix.length)
           paths.set(path, { importer, handle: transformer.handler })
-          return path
+          return `${path}__viteSafe__`
         }
       }
 
@@ -98,11 +98,12 @@ export default function inline(opts: Options = {}): Plugin {
     },
 
     async load(id) {
-      if (!paths.has(id)) {
+      const p = id.replace(/__viteSafe__$/, '')
+      if (!paths.has(p)) {
         return null
       }
-      const args = paths.get(id)
-      const ids = await this.resolve(id, args.importer)
+      const args = paths.get(p)
+      const ids = await this.resolve(p, args.importer)
       if (!ids) {
         return null
       }
