@@ -1,28 +1,19 @@
-import { readFile } from 'node:fs/promises'
 import type { Plugin } from 'rollup'
-import { compileAsync } from 'sass'
+import { readFile } from 'node:fs/promises'
 import { transform as lightCss } from 'lightningcss'
-import browersTarget from './browserslist'
+import { compileAsync } from 'sass'
+import browersTarget from './browserslist.ts'
 
-export type Transformer = (code: string, id: string) => string | Promise<string>
+export interface Transformer {
+  prefix: string
+  handler: (code: string, id: string) => Promise<string> | string
+}
 
 export interface Options {
   /**
-   *  Defaults to imports that start with `inline:`, e.g.
-   *  import 'inline:./file.ext';
-   */
-  prefix?: string
-
-  /**
-   *  Enable the CSS transformer
-   *  @default true
-   */
-  enableCSSTransformer?: boolean
-
-  /**
    *  Custom transformer
    */
-  transformer?: Transformer
+  transformer?: Transformer | Transformer[]
 }
 
 async function cssTransformer(code: string, id: string) {
@@ -45,22 +36,48 @@ async function cssTransformer(code: string, id: string) {
   return code
 }
 
-const defaults: Required<Omit<Options, 'transformer'>> = {
-  prefix: 'inline:',
-  enableCSSTransformer: true,
+// remove old duplicate
+function pushUnique(arr: Transformer[], ...item: Transformer[]) {
+  // remove old duplicate
+  for (const i of item) {
+    const index = arr.findIndex(v => v.prefix === i.prefix)
+    if (index !== -1) {
+      arr.splice(index, 1)
+    }
+    arr.push(i)
+  }
+  return arr
 }
 
 export default function inline(opts: Options = {}): Plugin {
-  const options = Object.assign({}, defaults, opts)
-  const { prefix, enableCSSTransformer, transformer } = options
+  const options = Object.assign({}, opts)
+  const { transformer } = options
 
   const transFormers: Transformer[] = []
 
-  if (enableCSSTransformer) {
-    transFormers.push(cssTransformer)
-  }
+  transFormers.push(
+    { prefix: 'inline:', handler: (code: string) => code },
+    {
+      prefix: 'css:',
+      handler: cssTransformer,
+    },
+    {
+      prefix: 'scss:',
+      handler: cssTransformer,
+    },
+    {
+      prefix: 'sass:',
+      handler: cssTransformer,
+    },
+  )
+
   if (transformer) {
-    transFormers.push(transformer)
+    if (Array.isArray(transformer)) {
+      pushUnique(transFormers, ...transformer)
+    }
+    else {
+      pushUnique(transFormers, transformer)
+    }
   }
 
   const paths = new Map()
@@ -69,12 +86,14 @@ export default function inline(opts: Options = {}): Plugin {
     name: 'rollup-plugin-inline-import',
 
     resolveId: (sourcePath, importer) => {
-      if (sourcePath.startsWith(prefix)) {
-        const path = sourcePath.slice(prefix.length)
-        // target - name
-        paths.set(path, importer)
-        return path
+      for (const transformer of transFormers) {
+        if (sourcePath.startsWith(transformer.prefix)) {
+          const path = sourcePath.slice(transformer.prefix.length)
+          paths.set(path, { importer, handle: transformer.handler })
+          return path
+        }
       }
+
       return null
     },
 
@@ -82,15 +101,14 @@ export default function inline(opts: Options = {}): Plugin {
       if (!paths.has(id)) {
         return null
       }
-      const ids = await this.resolve(id, paths.get(id))
+      const args = paths.get(id)
+      const ids = await this.resolve(id, args.importer)
       if (!ids) {
         return null
       }
 
       let code = await readFile(ids.id, 'utf8')
-      for (const transformer of transFormers) {
-        code = await transformer(code, ids.id)
-      }
+      code = await args.handle(code, ids.id)
 
       return `export default ${JSON.stringify(code.trim())};`
     },

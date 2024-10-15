@@ -1,5 +1,5 @@
-import style from "inline:./test.scss";
+import style from 'scss:./test.scss'
 
-console.log(style);
+console.log(style)
 
-export default style;
+export default style
