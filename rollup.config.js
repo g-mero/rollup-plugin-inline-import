@@ -8,7 +8,7 @@ const sets = [
     input: "src/index.ts", //入口文件
     output: {
       file: "dist/index.js", //打包后的存放文件
-      format: "cjs", //输出
+      format: "es", //输出
     },
     plugins: [],
   },

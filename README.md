@@ -33,10 +33,8 @@ const inputOptions: RollupOptions = {
 };
 ```
 
-
 ## config
 
 ```
-
 
 ```
