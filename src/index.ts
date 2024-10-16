@@ -90,7 +90,7 @@ export default function inline(opts: Options = {}): Plugin {
         if (sourcePath.startsWith(transformer.prefix)) {
           const path = sourcePath.slice(transformer.prefix.length)
           paths.set(path, { importer, handle: transformer.handler })
-          return `${path}__viteSafe__`
+          return `__viteSafe__${path}__viteSafe__`
         }
       }
 
@@ -98,10 +98,11 @@ export default function inline(opts: Options = {}): Plugin {
     },
 
     async load(id) {
-      const p = id.replace(/__viteSafe__$/, '')
+      const p = id.replace(/__viteSafe__$/, '').replace(/^__viteSafe__/, '')
       if (!paths.has(p)) {
         return null
       }
+      
       const args = paths.get(p)
       const ids = await this.resolve(p, args.importer)
       if (!ids) {
@@ -110,6 +111,7 @@ export default function inline(opts: Options = {}): Plugin {
 
       let code = await readFile(ids.id, 'utf8')
       code = await args.handle(code, ids.id)
+      this.addWatchFile(ids.id)
 
       return `export default ${JSON.stringify(code.trim())};`
     },

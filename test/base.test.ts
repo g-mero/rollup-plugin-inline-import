@@ -12,7 +12,7 @@ const inputOptions: RollupOptions = {
     name: 'test',
   },
   plugins: [
-
+    css(),
     resolve({
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
     }),
@@ -22,7 +22,6 @@ const inputOptions: RollupOptions = {
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
       exclude: 'mode_modules/**',
     }),
-    css(),
 
   ],
 }
