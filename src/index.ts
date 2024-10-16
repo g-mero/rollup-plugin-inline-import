@@ -102,7 +102,7 @@ export default function inline(opts: Options = {}): Plugin {
       if (!paths.has(p)) {
         return null
       }
-      
+
       const args = paths.get(p)
       const ids = await this.resolve(p, args.importer)
       if (!ids) {
@@ -115,32 +115,5 @@ export default function inline(opts: Options = {}): Plugin {
 
       return `export default ${JSON.stringify(code.trim())};`
     },
-
-    /*     async transform(content, id) {
-          if (!extensions.some((ext) => id.toLowerCase().endsWith(ext)))
-            return null;
-
-          let data = content;
-
-          if (id.toLowerCase().endsWith(".scss")) {
-            data = (await compileAsync(id)).css;
-          }
-
-          data = lightCss({
-            code: Buffer.from(data),
-            minify: true,
-            sourceMap: false,
-            targets: browersTarget,
-            filename: id,
-          }).code.toString();
-
-          const code = `var data = ${toSource(data)};\n\n`;
-          const exports = ["export default data;"];
-
-          return {
-            code: code + exports,
-            map: { mappings: "" },
-          };
-        }, */
   }
 }
