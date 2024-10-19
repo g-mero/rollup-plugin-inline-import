@@ -85,12 +85,16 @@ export default function inline(opts: Options = {}): Plugin {
   return {
     name: 'rollup-plugin-inline-import',
 
-    resolveId: (sourcePath, importer) => {
+    async resolveId(sourcePath, importer) {
       for (const transformer of transFormers) {
         if (sourcePath.startsWith(transformer.prefix)) {
           const path = sourcePath.slice(transformer.prefix.length)
-          paths.set(path, { importer, handle: transformer.handler })
-          return `__viteSafe__${path}__viteSafe__`
+          const ids = await this.resolve(path, importer)
+          if (!ids) {
+            return null
+          }
+          paths.set(ids.id, { handle: transformer.handler, importer })
+          return `__viteSafe__${ids.id}__viteSafe__`
         }
       }
 
@@ -104,14 +108,10 @@ export default function inline(opts: Options = {}): Plugin {
       }
 
       const args = paths.get(p)
-      const ids = await this.resolve(p, args.importer)
-      if (!ids) {
-        return null
-      }
 
-      let code = await readFile(ids.id, 'utf8')
-      code = await args.handle(code, ids.id)
-      this.addWatchFile(ids.id)
+      let code = await readFile(p, 'utf8')
+      code = await args.handle(code, p)
+      this.addWatchFile(p)
 
       return `export default ${JSON.stringify(code.trim())};`
     },
