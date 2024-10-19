@@ -1,7 +1,7 @@
 {
   "name": "rollup-plugin-inline-import",
   "type": "module",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A Rollup plugin to import file as string, such as css, html, svg, etc.",
   "author": "Gmero <gmerocom@gmail.com>",
   "homepage": "https://github.com/g-mero/rollup-plugin-importcss",
