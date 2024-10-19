@@ -34,7 +34,6 @@
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^28",
     "@rollup/plugin-node-resolve": "^15.3",
-    "@types/bun": "latest",
     "@types/node": "^22.5.1",
     "eslint": "^9",
     "rollup": "^4.24",
